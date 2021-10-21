@@ -34,11 +34,12 @@ def make_logger(log_level):
     logger.addHandler(h)
     return logger
 
-def print_from_file(filename, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01'):
+def print_from_file(filename, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01', show_preview=False):
     main(SimpleNamespace(**{
         'filename' : filename,
         'log_level' : log_level,
         'img_binarization_algo' : img_binarization_algo,
+        'show_preview' : show_preview,
         'devicename' : devicename
     }))
 
