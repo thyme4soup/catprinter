@@ -1,0 +1,1 @@
+from catprinter import print

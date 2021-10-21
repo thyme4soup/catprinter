@@ -5,9 +5,9 @@ import sys
 import os
 
 from types import SimpleNamespace
-from helpers.cmds import PRINT_WIDTH, cmds_print_img
-from helpers.ble import run_ble
-from helpers.img import read_img
+from catprinter.cmds import PRINT_WIDTH, cmds_print_img
+from catprinter.ble import run_ble
+from catprinter.img import read_img
 
 
 def parse_args():
