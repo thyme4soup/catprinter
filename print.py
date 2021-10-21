@@ -5,15 +5,9 @@ import sys
 import os
 
 from types import SimpleNamespace
-try:
-    from catprinter.catprinter.cmds import PRINT_WIDTH, cmds_print_img
-    from catprinter.catprinter.ble import run_ble
-    from catprinter.catprinter.img import read_img
-except Exception as e:
-    # Couldn't load as a pip package. Trying standalone
-    from catprinter.cmds import PRINT_WIDTH, cmds_print_img
-    from catprinter.ble import run_ble
-    from catprinter.img import read_img
+from helpers.cmds import PRINT_WIDTH, cmds_print_img
+from helpers.ble import run_ble
+from helpers.img import read_img
 
 
 def parse_args():
