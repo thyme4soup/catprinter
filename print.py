@@ -4,6 +4,7 @@ import logging
 import sys
 import os
 
+from types import SimpleNamespace
 from catprinter.cmds import PRINT_WIDTH, cmds_print_img
 from catprinter.ble import run_ble
 from catprinter.img import read_img
@@ -33,20 +34,26 @@ def make_logger(log_level):
     logger.addHandler(h)
     return logger
 
+def print_from_file(filename, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01'):
+    main(SimpleNamespace(**{
+        'filename' : filename,
+        'log_level' : log_level,
+        'img_binarization_algo' : img_binarization_algo,
+        'devicename' : devicename
+    }))
 
-def main():
-    args = parse_args()
-
-    log_level = getattr(logging, args.log_level.upper())
+def main(kwargs):
+    print(kwargs)
+    log_level = getattr(logging, kwargs.log_level.upper())
     logger = make_logger(log_level)
 
-    filename = args.filename
+    filename = kwargs.filename
     if not os.path.exists(filename):
         logger.info('🛑 File not found. Exiting.')
         return
 
-    bin_img = read_img(args.filename, PRINT_WIDTH,
-                       logger, args.img_binarization_algo, args.show_preview)
+    bin_img = read_img(kwargs.filename, PRINT_WIDTH,
+                       logger, kwargs.img_binarization_algo, kwargs.show_preview)
     if bin_img is None:
         logger.info(f'🛑 No image generated. Exiting.')
         return
@@ -56,8 +63,9 @@ def main():
     logger.info(f'✅ Generated BLE commands: {len(data)} bytes')
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_ble(data, args.devicename, logger))
+    loop.run_until_complete(run_ble(data, kwargs.devicename, logger))
 
 
 if __name__ == '__main__':
-    main()
+    kwargs = parse_args()
+    main(kwargs)
