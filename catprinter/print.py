@@ -13,7 +13,7 @@ from catprinter.img import read_img
 def parse_args():
     args = argparse.ArgumentParser(
         description='prints an image on your cat thermal printer')
-    args.add_argument('filename', type=str)
+    args.add_argument('url', type=str)
     args.add_argument('--log-level', type=str,
                       choices=['debug', 'info', 'warn', 'error'], default='info')
     args.add_argument('--img-binarization-algo', type=str,
@@ -34,9 +34,10 @@ def make_logger(log_level):
     logger.addHandler(h)
     return logger
 
-def print_from_file(filename, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01', show_preview=False):
+# URL can be a local file of the form file://<path-to-file>
+def print_from_url(url, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01', show_preview=False):
     main(SimpleNamespace(**{
-        'filename' : filename,
+        'url' : url,
         'log_level' : log_level,
         'img_binarization_algo' : img_binarization_algo,
         'show_preview' : show_preview,
@@ -48,16 +49,12 @@ def main(kwargs):
     log_level = getattr(logging, kwargs.log_level.upper())
     logger = make_logger(log_level)
 
-    filename = kwargs.filename
-    if not os.path.exists(filename):
-        logger.info('🛑 File not found. Exiting.')
-        return
-
-    bin_img = read_img(kwargs.filename, PRINT_WIDTH,
+    url = kwargs.url
+    bin_img = read_img(url, PRINT_WIDTH,
                        logger, kwargs.img_binarization_algo, kwargs.show_preview)
     if bin_img is None:
         logger.info(f'🛑 No image generated. Exiting.')
-        return
+        return False
 
     logger.info(f'✅ Read image: {bin_img.shape} (h, w) pixels')
     data = cmds_print_img(bin_img)
@@ -65,7 +62,7 @@ def main(kwargs):
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run_ble(data, kwargs.devicename, logger))
-
+    return True
 
 if __name__ == '__main__':
     kwargs = parse_args()

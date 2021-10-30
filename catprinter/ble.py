@@ -2,6 +2,7 @@ import asyncio
 from bleak import BleakClient, BleakError, BleakScanner
 
 TX_CHARACTERISTIC_UUID = '0000ae01-0000-1000-8000-00805f9b34fb'
+RX_UUID = '0000ae02-0000-1000-8000-00805f9b34fb'
 
 SCAN_TIMEOUT_S = 10
 
@@ -29,11 +30,14 @@ def chunkify(data, chunk_size):
         data[i: i + chunk_size] for i in range(0, len(data), chunk_size)
     )
 
+def read_callback(sender, data):
+    print(f'{sender}: {data}')
+
 
 async def run_ble(data, devicename, logger):
     address = await scan(devicename, SCAN_TIMEOUT_S, logger)
     logger.info(f'⏳ Connecting to {address}...')
-    async with BleakClient(address) as client:
+    async with BleakClient(address, timeout=60) as client:
         logger.info(
             f'✅ Connected: {client.is_connected}; MTU: {client.mtu_size}')
         chunk_size = client.mtu_size - 3
