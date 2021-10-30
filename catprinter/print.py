@@ -35,14 +35,31 @@ def make_logger(log_level):
     return logger
 
 # URL can be a local file of the form file://<path-to-file>
-def print_from_url(url, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01', show_preview=False):
-    main(SimpleNamespace(**{
+async def print_from_url(url, log_level='info', img_binarization_algo='floyd-steinberg', devicename='GT01', show_preview=False):
+    await amain(SimpleNamespace(**{
         'url' : url,
         'log_level' : log_level,
         'img_binarization_algo' : img_binarization_algo,
         'show_preview' : show_preview,
         'devicename' : devicename
     }))
+async def amain(kwargs):
+    log_level = getattr(logging, kwargs.log_level.upper())
+    logger = make_logger(log_level)
+
+    url = kwargs.url
+    bin_img = read_img(url, PRINT_WIDTH,
+                       logger, kwargs.img_binarization_algo, kwargs.show_preview)
+    if bin_img is None:
+        logger.info(f'🛑 No image generated. Exiting.')
+        return False
+
+    logger.info(f'✅ Read image: {bin_img.shape} (h, w) pixels')
+    data = cmds_print_img(bin_img)
+    logger.info(f'✅ Generated BLE commands: {len(data)} bytes')
+
+    await run_ble(data, kwargs.devicename, logger)
+    return True
 
 def main(kwargs):
     print(kwargs)
@@ -60,7 +77,8 @@ def main(kwargs):
     data = cmds_print_img(bin_img)
     logger.info(f'✅ Generated BLE commands: {len(data)} bytes')
 
-    await run_ble(data, kwargs.devicename, logger)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run_ble(data, kwargs.devicename, logger))
     return True
 
 if __name__ == '__main__':
