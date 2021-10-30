@@ -60,8 +60,7 @@ def main(kwargs):
     data = cmds_print_img(bin_img)
     logger.info(f'✅ Generated BLE commands: {len(data)} bytes')
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_ble(data, kwargs.devicename, logger))
+    await run_ble(data, kwargs.devicename, logger))
     return True
 
 if __name__ == '__main__':
