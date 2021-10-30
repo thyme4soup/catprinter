@@ -37,7 +37,7 @@ def read_callback(sender, data):
 async def run_ble(data, devicename, logger):
     address = await scan(devicename, SCAN_TIMEOUT_S, logger)
     logger.info(f'⏳ Connecting to {address}...')
-    async with BleakClient(address, timeout=60) as client:
+    async with BleakClient(address, timeout=60, device=devicename) as client:
         logger.info(
             f'✅ Connected: {client.is_connected}; MTU: {client.mtu_size}')
         chunk_size = client.mtu_size - 3
